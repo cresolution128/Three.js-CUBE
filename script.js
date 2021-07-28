@@ -20,7 +20,7 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera,renderer.domElement);
 //controls.autoRotate= true
 controls.autoRotateSpeed = 1;
-controls.enablePan = false;
+//controls.enablePan = false;
 const clock = new THREE.Clock();
 
 onWindowResize();
