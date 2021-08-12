@@ -9,7 +9,7 @@ export default function Qube(THREE, scene, loader) {
         let m = glb.scene.children[2];
         let box = m;
         let spacing = 1.0;
-        qube = new Object3D();
+        qube = this.root = new Object3D();
         let nr = 1;
         let nstep = 1;
         imesh = new InstancedMesh(m.geometry,m.material,(nr * 2 + 1) ** 2);
@@ -31,17 +31,25 @@ export default function Qube(THREE, scene, loader) {
     let rot = new Vector3();
     let tv0 = new Vector3();
 
+    let isSolved = ()=>{
+        let dist=0;
+        tv0.copy(qube.children[0].rotation);
+        qube.children.forEach(e=>tv1.copy(e.rotation) && (dist+=tv0.distanceToSquared(tv1)))
+        console.log('-----',dist)
+        return dist<.0001;
+    }
     let sortSlabs = ()=>{
-        let c = qube.children;
-        c.forEach(e=>{
+        qube.children.forEach(e=>{
             e.parent.worldToLocal(e.localToWorld(tv0.set(0, 0, 0)));
-            (!e.userData.loc && (e.userData.loc = tv0.clone())) || e.userData.loc.copy(tv0);
+            (!e.userData.loc && (e.userData.loc = tv0.clone()))
             let loc = e.userData.loc;
+            loc.copy(tv0);
             loc.x = floor(loc.x + 0.5);
             loc.y = floor(loc.y + 0.5);
             loc.z = floor(loc.z + 0.5);
             e.position.copy(loc);
             loc.add(tv0.set(1, 1, 1));
+            (!e.userData.solvedLoc) && (e.userData.solvedLoc=loc.clone());
         }
         );
     }
@@ -64,21 +72,19 @@ export default function Qube(THREE, scene, loader) {
     scene.add(rotor);
     let rotarget = tv0.clone();
     let rotating = false;
-    let sorted = false;
     let tv1 = tv0.clone();
+
+
 
     this.rotateSlab = s=>{
         if (rotating)
             return;
+        sortSlabs();
         rot.set(0, 0, 0);
         let face = (s / 6) | 0;
         let row = ((s % 6) / 2) | 0;
         let dir = s & 1;
         console.log("face", face, "row", row, "dir", dir);
-        if (!sorted) {
-            sortSlabs();
-            sorted = true;
-        }
         let c = qube.children;
         let slab = getSlab(face, row);
         rotor.rotation.set(0, 0, 0);
@@ -86,6 +92,7 @@ export default function Qube(THREE, scene, loader) {
         rotarget.set(face == 0 ? hPI : 0, face == 1 ? hPI : 0, face == 2 ? hPI : 0).multiplyScalar(dir ? -1 : 1);
         rotating = true;
         slab.forEach(s=>rotor.attach(s));
+
     }
     this.handleKey = e=>{
         let k = km.indexOf(e.code);
@@ -104,7 +111,12 @@ export default function Qube(THREE, scene, loader) {
                 let c = rotor.children.slice(0);
                 rotor.rotation.set(rotarget.x, rotarget.y, rotarget.z, "XYZ");
                 c.forEach(k=>qube.attach(k));
-                sorted = false;
+
+            sortSlabs();
+            let solved = isSolved()
+            let i = document.getElementsByTagName('title')[0]
+            i &&( i.innerText = solved?'SOLVED':"UNSOLVED")                
+
             }
         }
         blks.forEach((e,i)=>{

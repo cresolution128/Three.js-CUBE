@@ -3,6 +3,8 @@ import {OrbitControls} from "https://threejs.org/examples/jsm/controls/OrbitCont
 import {GLTFLoader} from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
 
 import Qube from "./qube.js";
+import MouseRaycaster from "../core/js/rendering/MouseRaycaster.js";
+import ZoomToCursorBehavior from "../core/js/rendering/ZoomToCursorBehavior.js";
 
 const camera = new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
@@ -21,6 +23,10 @@ const controls = new OrbitControls(camera,renderer.domElement);
 //controls.autoRotate= true
 controls.autoRotateSpeed = 1;
 //controls.enablePan = false;
+
+
+new ZoomToCursorBehavior({THREE,controls,camera});
+
 const clock = new THREE.Clock();
 
 onWindowResize();
@@ -79,5 +85,42 @@ function animate() {
     requestAnimationFrame(animate);
     render();
 }
+
+let mouseRaycaster = new MouseRaycaster(THREE)
+
+let hitIndicator = new THREE.Mesh(new THREE.SphereGeometry(.1),new THREE.MeshBasicMaterial())
+let hi1=hitIndicator.clone()
+hitIndicator.scale.set(1,1,1)
+hitIndicator.add(hi1)
+hi1.material=hi1.material.clone()
+hi1.material.color.set('black')
+hi1.renderOrder = 2;
+hi1.material.depthFunc=THREE.GreaterDepth;
+hi1.scale.multiplyScalar(.5)
+hitIndicator.onBeforeRender=function(){
+    hitIndicator.scale.multiplyScalar(.98)
+    if(hitIndicator.scale.x<.001)hitIndicator.parent.remove(hitIndicator);
+}
+let showHit=(obj,point)=>{
+    if(obj!=hitIndicator){
+        hitIndicator.scale.set(1,1,1)
+        obj.add(hitIndicator)
+        hitIndicator.position.copy(point)
+    }
+}
+
+
+document.addEventListener('mousedown',function(event){
+    let hits = mouseRaycaster.raycast({
+        event,
+        camera,
+        root:qube.root,
+        recursive:true})
+    console.log(hits)
+    if(hits.length){
+        let h=hits[0];
+        showHit(h.object,h.object.worldToLocal(h.point))
+    }
+})
 
 animate();
