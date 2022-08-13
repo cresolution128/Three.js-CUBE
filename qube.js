@@ -34,6 +34,7 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
     let rbk = glb=>{
         let m = glb.scene.children[2];
         let box = m;
+        box.geometry.scale(.999,.999,.999)
         let spacing = 1.0;
         qube = this.root = new Object3D();
         let nr = 1;
@@ -60,10 +61,19 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
         }
         );
 let keys=Object.keys(mats)
-
-		gui.add(mats[keys[0]],'envMapIntensity',0,10);
-		gui.add(mats[keys[0]],'metalness',0,1);
-        gui.add(mats[keys[0]],'roughness',0,1);
+let mat = mats[keys[0]]
+		gui.add(mat,'envMapIntensity',0,10);
+		gui.add(mat,'metalness',0,1);
+        gui.add(mat,'roughness',0,1);
+        
+        
+        gui.add(mat,'opacity',0,1).onChange(v=>{
+            mat.opacity = v;
+            mat.side=v==1?THREE.FrontSide:THREE.DoubleSide;
+            mat.transparent = v==1?false:true;
+            
+        });
+        
         
         qube.updateMatrix(true)
         scene.add(qube);
