@@ -65,7 +65,12 @@ function loadHDREquirect(path) {
         scene.background = envMap;
         scene.environment = envMap;
         texture.dispose();
-        pmremGenerator.dispose();
+
+if(qube.root)qube.root.visible = false;
+        scene.background = scene.envMap = pmremGenerator.fromScene(scene,.0075).texture;
+if(qube.root)qube.root.visible = true;
+
+        pmremGenerator.dispose();        
     })
 }
 
