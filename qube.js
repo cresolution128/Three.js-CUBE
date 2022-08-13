@@ -173,19 +173,29 @@ let keys=Object.keys(mats)
     let solved
 
     let rotation={
-        speed:.1
+        speed:.33
     }
-    gui.addFolder('rotation').add(rotation,'speed',0,.33);
+    gui.addFolder('rotation').add(rotation,'speed',0.1,1.);
+
+    let roquat;
     this.update = ()=>{
         if (rotating) {
+
+            if(!roquat){
+                roquat = new THREE.Quaternion().setFromEuler(new THREE.Euler().set(rotor.rotation.x+rotarget.x,rotor.rotation.y+rotarget.y,rotor.rotation.z+rotarget.z));
+            }
+            rotor.quaternion.slerp(roquat,rotation.speed)
+            /*
             rotor.rotation.x += rotarget.x * rotation.speed;
             rotor.rotation.y += rotarget.y * rotation.speed;
             rotor.rotation.z += rotarget.z * rotation.speed;
+            */
             
             tv1.copy(rotor.rotation);
             tv1.sub(rotarget);
-            if (tv1.length() < 0.3) {
+            if (tv1.length() < 0.01) {
                 rotating = false;
+                roquat=undefined;
                 let c = rotor.children.slice(0);
                 rotor.rotation.set(rotarget.x, rotarget.y, rotarget.z, "XYZ");
                 c.forEach(k=>qube.attach(k));
