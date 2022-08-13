@@ -89,7 +89,7 @@ let keys=Object.keys(mats)
             
         }
     }
-    new loader().load(`rbik.glb`, rbk);
+    new loader().load(`./assets/rbik.glb`, rbk);
     let rot = new Vector3();
     let tv0 = new Vector3();
 
@@ -165,9 +165,12 @@ let keys=Object.keys(mats)
         k >= 0 && this.rotateSlab(k);
     }
     this.shuffle = false
+    let shufIndex = 0;
     this.doShuffle = ()=>{
         if (this.shuffle){
-            this.rotateSlab((Math.random() * 18) | 0);
+            this.rotateSlab(shufIndex);//
+            shufIndex+=(1+((Math.random() * 16) | 0));
+            shufIndex%=18;
         }
     }
     let solved
@@ -223,7 +226,7 @@ let keys=Object.keys(mats)
     let {abs} = Math;
     let toSide = v0.clone().set(12, 6, 0)
 
-    let maxAxis = (v0)=>{
+    let maxAxis = this.maxAxis = (v0)=>{
         v1.set(abs(v0.x), abs(v0.y), abs(v0.z));
         let ax = 'x'
         if (v1.y > v1.x)

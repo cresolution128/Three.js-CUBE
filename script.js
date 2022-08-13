@@ -13,9 +13,9 @@ import sound from "./sound.js"
 const camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
 camera.position.copy({
-    x: -5.474051510152458,
-    y: 8.270357989160933,
-    z: -5.386340279152456
+    x: -5.,
+    y: 5.,
+    z: -5.
 });
 const scene = new THREE.Scene();
 await sound({THREE,camera})
@@ -41,9 +41,11 @@ controls.autoRotateSpeed = 1;
 controls.enablePan = false;
 
 let envMaps = ['evening_meadow_1k.hdr', 'pretville_street_1k (1).hdr', 'solitude_interior_1k.hdr']
+let mapsByName={}
 function loadHDREquirect(path) {
     var pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
+
     new RGBELoader().setPath('').load(path, function(texture) {
         var envMap = pmremGenerator.fromEquirectangular(texture).texture;
         scene.background = envMap;
@@ -54,7 +56,19 @@ function loadHDREquirect(path) {
 }
 let arnd = (a)=>a[(a.length * Math.random()) | 0]
 //loadHDREquirect('./' + envMaps[2])
-loadHDREquirect('./'+arnd(envMaps));//pretville_street_1k (1).hdr')
+
+let idx = (envMaps.length * Math.random()) | 0
+loadHDREquirect('./assets/'+envMaps[idx]);//pretville_street_1k (1).hdr')
+
+
+let envProps={}
+envMaps.forEach((s,i)=>envProps[s]=i)
+gui.add( {envMap:idx}, 'envMap', envProps ).onChange((v)=>{
+    loadHDREquirect('./assets/'+envMaps[v]);
+    
+})
+
+
 //solitude_interior_1k.hdr
 
 const clock = new THREE.Clock();
@@ -199,9 +213,15 @@ let playSnd=(prams={name:'done',volume:.5,loop:false})=>{
 function pup(event) {
     let dragEndHits = doRaycast()
     if(!dragEndHits)dragEndHits = lastMoveHits;
+
+    
+    if(lastMoveHits){
+        if(qube.maxAxis(dragEndHits[0].point)!==qube.maxAxis(lastMoveHits[0].point))
+            dragEndHits = lastMoveHits
+    }
     if (dragEndHits) {
         qube.drag(dragStartHits, dragEndHits)
-    }
+    } 
     dragStartHits = dragEndHits = lastMoveHits = undefined;
     controls.enabled = true;
     document.removeEventListener('pointermove', pmove)
@@ -214,6 +234,14 @@ function pmove(event) {
 
         if(lastMoveHits&&(lastMoveHits[0].object!==dragMoveHits.object))
             dragMoveHits = lastMoveHits
+
+
+        
+    if(lastMoveHits){
+        if(qube.maxAxis(dragMoveHits[0].point)!==qube.maxAxis(lastMoveHits[0].point))
+            dragMoveHits = lastMoveHits
+    }
+        
         lastMoveHits = dragMoveHits;
     }
     else
