@@ -1,4 +1,4 @@
-export default async function sound({THREE,camera}) {
+export default async function sound({THREE,camera,gui}) {
     let spinSounds = [`spin0`, `spin1`, `spin2`, `spin3`, `spin4`]
     let audioLoader = new THREE.AudioLoader();
     let snds = {}
@@ -13,6 +13,7 @@ export default async function sound({THREE,camera}) {
     }
 let audioReady=false
 
+    
     // create an AudioListener and add it to the camera 
     const listener = new THREE.AudioListener(); 
     camera.add( listener ); // create a global audio source
@@ -34,7 +35,10 @@ let audioReady=false
     }
     document.addEventListener('pointerdown',firstInteraction)
     
+let sndParams = {'🔊':true} 
+gui.add(sndParams,'🔊')
     let playSound = ({name='done',detune=0})=>{
+        if(!sndParams['🔊'])return;
         let snd = snds[name];
         let sound = soundChannels[(chanTop++)%soundChannels.length];
         if(sound.isPlaying)sound.stop()

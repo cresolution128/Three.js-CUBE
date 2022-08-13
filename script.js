@@ -10,6 +10,7 @@ import sound from "./sound.js"
 //import MouseRaycaster from "../core/js/rendering/camera2/MouseRaycaster.js";
 //import ZoomToCursorBehavior from "../core/js/rendering/camera2/ZoomToCursorBehavior.js";
 
+const gui = new GUI( { width: 310 } ).close();
 const camera = new THREE.PerspectiveCamera(70,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
 camera.position.copy({
@@ -18,13 +19,12 @@ camera.position.copy({
     z: -5.
 }).multiplyScalar(2)
 const scene = new THREE.Scene();
-await sound({THREE,camera})
+await sound({THREE,camera,gui})
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 
-const gui = new GUI( { width: 310 } ).close();
 let opts = Object.keys(THREE).filter(e=>e.indexOf('ToneMapping')>0)
 let tm={}
 opts.forEach((k)=>{
@@ -242,7 +242,7 @@ let doRaycast = ()=>{
 let lastMoveHits;
 
 let playSnd=(prams={name:'done',volume:.5,loop:false})=>{
-    document.dispatchEvent(new CustomEvent('sound',{detail:prams}))
+        document.dispatchEvent(new CustomEvent('sound',{detail:prams}))
 }
 function pup(event) {
     let dragEndHits = doRaycast()
