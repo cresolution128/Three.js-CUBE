@@ -30,12 +30,13 @@ renderer.shadowMap.type = THREE.VSMShadowMap;
 */
 
 
-const gui = new GUI( { width: 310 } );
+const gui = new GUI( { width: 310 } ).close();
 
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor('white')
 const controls = new OrbitControls(camera,renderer.domElement);
+
 //controls.autoRotate= true
 controls.autoRotateSpeed = 1;
 controls.enablePan = false;
