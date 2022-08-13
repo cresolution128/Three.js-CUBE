@@ -9,7 +9,11 @@ import Qube from "./qube.js";
 
 const camera = new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
-
+camera.position.copy({
+    x: -5.474051510152458,
+    y: 8.270357989160933,
+    z: -5.386340279152456
+});
 const scene = new THREE.Scene();
 
 const renderer = new THREE.WebGLRenderer({
@@ -29,12 +33,11 @@ const controls = new OrbitControls(camera,renderer.domElement);
 controls.autoRotateSpeed = 1;
 controls.enablePan = false;
 
-let envMaps=['evening_meadow_1k.hdr','pretville_street_1k (1).hdr','solitude_interior_1k.hdr']
+let envMaps = ['evening_meadow_1k.hdr', 'pretville_street_1k (1).hdr', 'solitude_interior_1k.hdr']
 function loadHDREquirect(path) {
     var pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
-    new RGBELoader().setPath('').load(path,
-    function(texture) {
+    new RGBELoader().setPath('').load(path, function(texture) {
         var envMap = pmremGenerator.fromEquirectangular(texture).texture;
         scene.background = envMap;
         scene.environment = envMap;
@@ -42,8 +45,9 @@ function loadHDREquirect(path) {
         pmremGenerator.dispose();
     })
 }
-let arnd =(a)=>a[(a.length*Math.random())|0]
-loadHDREquirect('./'+envMaps[2])//arnd(envMaps));//pretville_street_1k (1).hdr')
+let arnd = (a)=>a[(a.length * Math.random()) | 0]
+//loadHDREquirect('./' + envMaps[2])
+loadHDREquirect('./'+arnd(envMaps));//pretville_street_1k (1).hdr')
 //solitude_interior_1k.hdr
 
 const clock = new THREE.Clock();
@@ -74,14 +78,23 @@ dirLight.castShadow = true;
 let light1 = new THREE.PointLight(0xffffff);
 light1.position.set(5, 9, -5).multiplyScalar(100);
 */
-let light2 = new THREE.PointLight(0xffffff,100,10,2);
+let light2 = new THREE.PointLight(0xffffff,3,100,2);
 light2.position.set(0, 0, .1)
 camera.add(light2)
 //scene.add(lights);
 
+
+let ambient = new THREE.AmbientLight(0xffffff);
+scene.add(ambient)
+
+
+
 scene.add(camera);
 
 let qube = new Qube(THREE,scene,GLTFLoader)
+
+    controls.minDistance = 5.5;
+controls.enableDamping = true;
 
 function render() {
     qube.update()
@@ -105,19 +118,22 @@ function animate() {
 
 let dragStartHits;
 
-let hitIndicator = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5),new THREE.MeshBasicMaterial({
+//let geo =new THREE.PlaneGeometry(.5,.5) 
+let geo = new THREE.CylinderGeometry(.5,.5,.01,32)
+geo.rotateX(Math.PI * .5);
+let hitIndicator = new THREE.Mesh(geo,new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide
 }))
 hitIndicator.geometry.translate(0, 0, .01)
 hitIndicator.renderOrder = 2;
 hitIndicator.material.depthFunc = THREE.GreaterDepth;
-hitIndicator.onBeforeRender = function() {
+let dragIndicator = hitIndicator.clone();
+dragIndicator.onBeforeRender = hitIndicator.onBeforeRender = function() {
     if (!dragStartHits)
         this.scale.multiplyScalar(.98)
     if (this.scale.x < .001)
         this.parent.remove(this);
 }
-let dragIndicator = hitIndicator.clone();
 let v0 = new THREE.Vector3()
 let v1 = new THREE.Vector3()
 let v2 = new THREE.Vector3()
