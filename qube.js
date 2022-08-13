@@ -1,4 +1,4 @@
-export default function Qube(THREE, scene, loader) {
+export default function Qube({THREE, scene, loader,gui}) {
     let {Vector3, Object3D, InstancedMesh} = THREE;
     let {floor, min, max, PI} = Math;
     let km = `QWERTYASDFGHZXCVBN`.split("").map(e=>"Key" + e);
@@ -13,6 +13,9 @@ export default function Qube(THREE, scene, loader) {
         document.body.appendChild(status)
         return status;
     }
+let playSound=(prams={name:'done',volume:.5,loop:false})=>{
+    document.dispatchEvent(new CustomEvent('sound',{detail:prams}))
+}
     let status = ele('span', 120, 5);
 
     let shuffleButton = ele('button', 5, 5, "shuffle");
@@ -45,14 +48,22 @@ export default function Qube(THREE, scene, loader) {
                     bx.userData.startQuaternion = bx.quaternion.clone();
                 }
         qube.scale.multiplyScalar(2);
+        let mats={}
+        let matList=[]
         qube.traverse(e=>{
             e.isMesh && (e.castShadow = e.receiveShadow = true);
             if (e.material) {
+                mats[e.material.uuid]=e.material;
                 e.material.metalness = .8;
                 e.material.roughness = .2;
             }
         }
         );
+let keys=Object.keys(mats)
+
+		gui.add(mats[keys[0]],'metalness',0,1);
+        gui.add(mats[keys[0]],'roughness',0,1);
+        
         qube.updateMatrix(true)
         scene.add(qube);
     }
@@ -125,9 +136,13 @@ export default function Qube(THREE, scene, loader) {
     let rotating = false;
     let tv1 = tv0.clone();
 
+
+    
     this.rotateSlab = s=>{
         if (rotating)
             return;
+        playSound({name:'spin'+((Math.random()*5)|0),detune:((Math.random()-.5)*500)|0})
+    
         sortSlabs();
         rot.set(0, 0, 0);
         let face = (s / 6) | 0;
@@ -143,7 +158,7 @@ export default function Qube(THREE, scene, loader) {
         rotating = true;
         slab.forEach(s=>rotor.attach(s));
         history.push(s);
-status.innerText = ''+s+' '
+        status.innerText = 'h:'+history.length+ ' m:'+s+' '
     }
     this.handleKey = e=>{
         let k = km.indexOf(e.code);
@@ -155,21 +170,34 @@ status.innerText = ''+s+' '
             this.rotateSlab((Math.random() * 18) | 0);
         }
     }
+    let solved
+
+    let rotation={
+        speed:.1
+    }
+    gui.addFolder('rotation').add(rotation,'speed',0,.33);
     this.update = ()=>{
         if (rotating) {
-            rotor.rotation.x += rotarget.x * 0.1;
-            rotor.rotation.y += rotarget.y * 0.1;
-            rotor.rotation.z += rotarget.z * 0.1;
+            rotor.rotation.x += rotarget.x * rotation.speed;
+            rotor.rotation.y += rotarget.y * rotation.speed;
+            rotor.rotation.z += rotarget.z * rotation.speed;
+            
             tv1.copy(rotor.rotation);
             tv1.sub(rotarget);
-            if (tv1.length() < 0.15) {
+            if (tv1.length() < 0.3) {
                 rotating = false;
                 let c = rotor.children.slice(0);
                 rotor.rotation.set(rotarget.x, rotarget.y, rotarget.z, "XYZ");
                 c.forEach(k=>qube.attach(k));
 
                 sortSlabs();
-                let solved = isSolved()
+                let wasSolved = solved;
+                solved = isSolved()
+                if(solved&&(!wasSolved)){
+                    playSound({name:'done'})
+                    history.lenght = 0;
+                    
+                }
                 let i = status
                 i && (i.innerText += solved ? ' SOLVED' : " UNSOLVED");
                 i &&(i.style.color = (solved) ?'green':'red')

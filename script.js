@@ -2,8 +2,11 @@ import*as THREE from "https://threejs.org/build/three.module.js";
 import {OrbitControls} from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 import {GLTFLoader} from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
 import {RGBELoader} from "https://threejs.org/examples/jsm/loaders/RGBELoader.js";
-
+import { GUI } from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
 import Qube from "./qube.js";
+import sound from "./sound.js"
+
+
 //import MouseRaycaster from "../core/js/rendering/camera2/MouseRaycaster.js";
 //import ZoomToCursorBehavior from "../core/js/rendering/camera2/ZoomToCursorBehavior.js";
 
@@ -15,6 +18,7 @@ camera.position.copy({
     z: -5.386340279152456
 });
 const scene = new THREE.Scene();
+await sound({THREE,camera})
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -24,6 +28,9 @@ const renderer = new THREE.WebGLRenderer({
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.VSMShadowMap;
 */
+
+
+const gui = new GUI( { width: 310 } );
 
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
@@ -78,22 +85,27 @@ dirLight.castShadow = true;
 let light1 = new THREE.PointLight(0xffffff);
 light1.position.set(5, 9, -5).multiplyScalar(100);
 */
+/*
 let light2 = new THREE.PointLight(0xffffff,3,100,2);
 light2.position.set(0, 0, .1)
 camera.add(light2)
+*/
+
 //scene.add(lights);
 
 
-let ambient = new THREE.AmbientLight(0xffffff);
+let ambient = new THREE.AmbientLight(0xffffff,1);
+let lf = gui.addFolder('ambient light');
+lf.add(ambient,'intensity',0,1);
 scene.add(ambient)
-
 
 
 scene.add(camera);
 
-let qube = new Qube(THREE,scene,GLTFLoader)
+let qube = new Qube({THREE,scene,loader:GLTFLoader,gui})
 
     controls.minDistance = 5.5;
+    controls.maxDistance = 70.5;
 controls.enableDamping = true;
 
 function render() {
@@ -181,6 +193,9 @@ let doRaycast = ()=>{
 }
 let lastMoveHits;
 
+let playSnd=(prams={name:'done',volume:.5,loop:false})=>{
+    document.dispatchEvent(new CustomEvent('sound',{detail:prams}))
+}
 function pup(event) {
     let dragEndHits = doRaycast()
     if(!dragEndHits)dragEndHits = lastMoveHits;
@@ -196,9 +211,13 @@ function pmove(event) {
     let dragMoveHits = doRaycast()
     if (dragMoveHits){
         showHit(dragMoveHits[0], dragIndicator)
-    lastMoveHits = dragMoveHits;
+
+        if(lastMoveHits&&(lastMoveHits[0].object!==dragMoveHits.object))
+            dragMoveHits = lastMoveHits
+        lastMoveHits = dragMoveHits;
     }
-    else dragMoveHits = lastMoveHits
+    else
+        dragMoveHits = lastMoveHits
 }
 function pdown(event) {
     if (dragStartHits = doRaycast()) {
