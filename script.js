@@ -10,7 +10,7 @@ import sound from "./sound.js"
 //import MouseRaycaster from "../core/js/rendering/camera2/MouseRaycaster.js";
 //import ZoomToCursorBehavior from "../core/js/rendering/camera2/ZoomToCursorBehavior.js";
 
-const camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1,1000);
+const camera = new THREE.PerspectiveCamera(70,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
 camera.position.copy({
     x: -5.,
@@ -23,6 +23,9 @@ await sound({THREE,camera})
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
+
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 10000;
 
 /*
 renderer.shadowMap.enabled = true;
@@ -127,6 +130,9 @@ function render() {
     qube.update()
     controls.update();
     renderer.render(scene, camera);
+    if(renderer.toneMappingExposure>1.5){
+        renderer.toneMappingExposure+=(1-renderer.toneMappingExposure)*.15
+    }
 }
 
 document.addEventListener("keydown", qube.handleKey)
