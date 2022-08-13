@@ -10,7 +10,7 @@ import sound from "./sound.js"
 //import MouseRaycaster from "../core/js/rendering/camera2/MouseRaycaster.js";
 //import ZoomToCursorBehavior from "../core/js/rendering/camera2/ZoomToCursorBehavior.js";
 
-const camera = new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1,1000);
+const camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1,1000);
 camera.position.set(1, 1, 1).multiplyScalar(8);
 camera.position.copy({
     x: -5.474051510152458,
