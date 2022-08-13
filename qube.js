@@ -61,6 +61,7 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
         );
 let keys=Object.keys(mats)
 
+		gui.add(mats[keys[0]],'envMapIntensity',0,10);
 		gui.add(mats[keys[0]],'metalness',0,1);
         gui.add(mats[keys[0]],'roughness',0,1);
         

@@ -16,7 +16,7 @@ camera.position.copy({
     x: -5.,
     y: 5.,
     z: -5.
-});
+}).multiplyScalar(2)
 const scene = new THREE.Scene();
 await sound({THREE,camera})
 
@@ -24,8 +24,16 @@ const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 
+const gui = new GUI( { width: 310 } ).close();
+let opts = Object.keys(THREE).filter(e=>e.indexOf('ToneMapping')>0)
+let tm={}
+opts.forEach((k)=>{
+    tm[k]=THREE[k];
+})
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+gui.add(renderer,'toneMapping',tm)
 renderer.toneMappingExposure = 10000;
+gui.add(renderer,'toneMappingExposure',.1,100)
 
 /*
 renderer.shadowMap.enabled = true;
@@ -33,7 +41,6 @@ renderer.shadowMap.type = THREE.VSMShadowMap;
 */
 
 
-const gui = new GUI( { width: 310 } ).close();
 
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
@@ -46,18 +53,22 @@ controls.enablePan = false;
 
 let envMaps = ['evening_meadow_1k.hdr', 'pretville_street_1k (1).hdr', 'solitude_interior_1k.hdr']
 let mapsByName={}
+let saveEnv;
+
 function loadHDREquirect(path) {
     var pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
     new RGBELoader().setPath('').load(path, function(texture) {
         var envMap = pmremGenerator.fromEquirectangular(texture).texture;
+        saveEnv = envMap;
         scene.background = envMap;
         scene.environment = envMap;
         texture.dispose();
         pmremGenerator.dispose();
     })
 }
+
 let arnd = (a)=>a[(a.length * Math.random()) | 0]
 //loadHDREquirect('./' + envMaps[2])
 
@@ -68,8 +79,24 @@ loadHDREquirect('./assets/'+envMaps[idx]);//pretville_street_1k (1).hdr')
 let envProps={}
 envMaps.forEach((s,i)=>envProps[s]=i)
 gui.add( {envMap:idx}, 'envMap', envProps ).onChange((v)=>{
-    loadHDREquirect('./assets/'+envMaps[v]);
-    
+    loadHDREquirect('./assets/'+envMaps[v]);    
+})
+let saveBack;
+gui.add({background:true},'background').onChange(v=>{
+    if(!v){
+        saveBack=scene.background;
+        scene.background = null;
+    }else
+       scene.background = saveBack;
+
+})
+gui.add({environment:true},'environment').onChange(v=>{
+    if(!v){
+        saveEnv=scene.environment;
+        scene.environment = null;
+    }else
+       scene.environment = saveEnv;
+
 })
 
 
