@@ -179,22 +179,26 @@ let doRaycast = ()=>{
         return hits;
     }
 }
+let lastMoveHits;
 
 function pup(event) {
     let dragEndHits = doRaycast()
+    if(!dragEndHits)dragEndHits = lastMoveHits;
     if (dragEndHits) {
         qube.drag(dragStartHits, dragEndHits)
     }
-    dragStartHits = dragEndHits = undefined;
+    dragStartHits = dragEndHits = lastMoveHits = undefined;
     controls.enabled = true;
     document.removeEventListener('pointermove', pmove)
     document.removeEventListener('pointerup', pup)
 }
-
 function pmove(event) {
     let dragMoveHits = doRaycast()
-    if (dragMoveHits)
+    if (dragMoveHits){
         showHit(dragMoveHits[0], dragIndicator)
+    lastMoveHits = dragMoveHits;
+    }
+    else dragMoveHits = lastMoveHits
 }
 function pdown(event) {
     if (dragStartHits = doRaycast()) {
