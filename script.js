@@ -51,7 +51,7 @@ const controls = new OrbitControls(camera,renderer.domElement);
 controls.autoRotateSpeed = 1;
 controls.enablePan = false;
 
-let envMaps = ['evening_meadow_1k.hdr', 'pretville_street_1k (1).hdr', 'solitude_interior_1k.hdr']
+let envMaps = ['evening_meadow_1k.hdr', 'pretville_street_1k (1).hdr', 'solitude_interior_1k.hdr','snowy_park_01_1k.hdr','cannon_1k.hdr']
 let mapsByName={}
 let saveEnv;
 

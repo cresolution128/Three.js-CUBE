@@ -54,8 +54,8 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
             e.isMesh && (e.castShadow = e.receiveShadow = true);
             if (e.material) {
                 mats[e.material.uuid]=e.material;
-                e.material.metalness = .8;
-                e.material.roughness = .2;
+                e.material.metalness = .9;
+                e.material.roughness = .1;
             }
         }
         );
