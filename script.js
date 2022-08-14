@@ -154,16 +154,21 @@ scene.add(camera);
 
 let qube = new Qube({THREE,scene,loader:GLTFLoader,gui})
 
-    controls.minDistance = 5.5;
-    controls.maxDistance = 70.5;
+controls.minDistance = 5.5;
+controls.maxDistance = 70.5;
 controls.enableDamping = true;
-
+let intro = true;
 function render() {
     qube.update()
     controls.update();
     renderer.render(scene, camera);
-    if(renderer.toneMappingExposure>1.5){
-        renderer.toneMappingExposure+=(1-renderer.toneMappingExposure)*.15
+    if(intro){
+        if(renderer.toneMappingExposure>=1.6){
+            renderer.toneMappingExposure+=(1.5-renderer.toneMappingExposure)*.15
+     
+        }else{
+                   intro = false;
+        }
     }
 }
 

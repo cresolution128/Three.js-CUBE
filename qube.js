@@ -30,28 +30,14 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
         solveButton.style.color = this.solving ? 'red' : 'blue'
 
     }
-
+let cubeTemplates
+    let cubeParams={
+        style:0
+    }
     let rbk = glb=>{
-        let m = glb.scene.children[2];
-        let box = m;
-        box.geometry.scale(.999,.999,.999)
-        let spacing = 1.0;
-        qube = this.root = new Object3D();
-        let nr = 1;
-        let nstep = 1;
-        for (let i = -nr, bx; i <= nr; i += nstep)
-            for (let j = -nr; j <= nr; j += nstep)
-                for (let k = -nr; k <= nr; k += nstep) {
-                    qube.add((bx = box.clone()));
-                    bx.position.set(i, j, k).multiplyScalar(spacing);
-                    blks.push(bx);
-                    bx.userData.startPosition = bx.position.clone();
-                    bx.userData.startQuaternion = bx.quaternion.clone();
-                }
-        qube.scale.multiplyScalar(2);
         let mats={}
         let matList=[]
-        qube.traverse(e=>{
+        glb.scene.traverse(e=>{
             e.isMesh && (e.castShadow = e.receiveShadow = true);
             if (e.material) {
                 mats[e.material.uuid]=e.material;
@@ -60,11 +46,41 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
             }
         }
         );
+        cubeTemplates=[glb.scene.children[2],glb.scene.children[3],glb.scene.children[4]]
+        let m = cubeTemplates[cubeParams.style];
+        let box = m;
+        box.geometry.scale(.999,.999,.999)
+        let spacing = 1.0;
+        qube = this.root = new Object3D();
+        let nr = 1;
+        let nstep = 1;
+        let originalPositions=[]
+        for (let i = -nr, bx; i <= nr; i += nstep)
+            for (let j = -nr; j <= nr; j += nstep)
+                for (let k = -nr; k <= nr; k += nstep) {
+                    qube.add((bx = box.clone()));
+                    bx.userData.key = `${i},${j},${k}`;
+                    
+                    bx.position.set(i, j, k).multiplyScalar(spacing);
+                    blks.push(bx);
+                    bx.userData.startPosition = bx.position.clone();
+                    bx.userData.startQuaternion = bx.quaternion.clone();
+                }
+        qube.scale.multiplyScalar(2);
 let keys=Object.keys(mats)
-let mat = mats[keys[0]]
-		gui.add(mat,'envMapIntensity',0,10);
-		gui.add(mat,'metalness',0,1);
-        gui.add(mat,'roughness',0,1);
+        let mat=mats[keys[0]];
+        let curMat;
+		gui.add(mat,'envMapIntensity',0,10).onChange(v=>curMat&&(curMat.envMapIntensity=v))
+		gui.add(mat,'metalness',0,1).onChange(v=>curMat&&(curMat.metalness=v))
+        gui.add(mat,'roughness',0,1).onChange(v=>curMat&&(curMat.roughness=v))
+        gui.add(cubeParams,'style',0,cubeTemplates.length).onChange(val=>{
+            let ct=cubeTemplates[parseInt(val)%cubeTemplates.length];
+            qube.children.forEach(e=>{
+                e.geometry = ct.geometry;
+                e.material = ct.material;
+                curMat = e.material;
+            })
+        });
         
         
         gui.add(mat,'opacity',0,1).onChange(v=>{
@@ -100,7 +116,7 @@ let mat = mats[keys[0]]
             
         }
     }
-    new loader().load(`./assets/rbik.glb`, rbk);
+    new loader().load(`./assets/rbik1.glb`, rbk);
     let rot = new Vector3();
     let tv0 = new Vector3();
 
@@ -109,7 +125,7 @@ let mat = mats[keys[0]]
         tv0.copy(qube.children[0].rotation);
         qube.children.forEach(e=>tv1.copy(e.rotation) && (dist += tv0.distanceToSquared(tv1)))
         //console.log('-----', dist)
-        return dist < .0001;
+        return dist < .0002;
     }
     let sortSlabs = ()=>{
         qube.children.forEach(e=>{
