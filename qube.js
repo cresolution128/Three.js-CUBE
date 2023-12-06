@@ -13,6 +13,9 @@ export default function Qube({THREE, scene, loader,gui}) {
         document.body.appendChild(status)
         return status;
     }
+    this.isValidDrag=(lastMoveHits,dragMoveHits)=>{       
+         return (maxAxis(dragMoveHits[0].point)!==maxAxis(lastMoveHits[0].point))
+    }
 let playSound=(prams={name:'done',volume:.5,loop:false})=>{
     document.dispatchEvent(new CustomEvent('sound',{detail:prams}))
 }
@@ -32,7 +35,7 @@ let playSound=(prams={name:'done',volume:.5,loop:false})=>{
     }
 let cubeTemplates
     let cubeParams={
-        style:0
+        style:2
     }
     let rbk = glb=>{
         let mats={}
