@@ -3,7 +3,7 @@ import {OrbitControls} from "https://threejs.org/examples/jsm/controls/OrbitCont
 import {GLTFLoader} from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
 import {RGBELoader} from "https://threejs.org/examples/jsm/loaders/RGBELoader.js";
 import { GUI } from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
-import sound from "./sound.js"
+import sound from "./sound.js";
 
 import Qube from "./qube.js";
 
