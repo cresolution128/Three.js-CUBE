@@ -5,7 +5,7 @@ export default function Qube({THREE, scene, loader,gui}) {
     let qube;
     let imesh;
     let blks = [];
-    let history = []
+    let history = [];
     let ele = (type,x=0,y=0,text="QUBE!")=>{
         let status = document.createElement(type);
         status.innerText = text;
