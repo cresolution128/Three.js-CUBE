@@ -8,7 +8,7 @@ export default function Qube({THREE, scene, loader,gui}) {
     let history = []
     let ele = (type,x=0,y=0,text="QUBE!")=>{
         let status = document.createElement(type);
-        status.innerText = text
+        status.innerText = text;
         status.style = `color:blue;position:absolute;left:${x}px;top:${y}px;font-family:Arial;`
         document.body.appendChild(status)
         return status;
